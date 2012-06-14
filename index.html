@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="PosterEditor.js"></script>
+        <script type="text/javascript" src="jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="raphael_b.js"></script>
+        <script type="text/javascript" src="editor-or.js"></script>
+	<script type="text/javascript" src="shape.js"></script>
+	<script type="text/javascript" src="tracker.js"></script>
+	<script type="text/javascript" src="path.js"></script>
+	<script type="text/javascript">
+		window.onload=function(){
+			poster_editor.attachCanvas(document.getElementById('canvas'));
+			poster_editor.setBackgroundImage('ccc.jpg');
+			poster_editor.renderText=function (text,options) {
+                             //please use ajax to get a svg file from server,
+                             //which is rendered by server with the text.
+                             //here is just a test case, will not use ajax to 
+			     //request the service.
+				return path_string;
+                          }; 
+		}
+	</script>
+</head>
+
+<body>
+	<div style="border:1px solid #555555;display:inline-block">
+		<div class="toolbar">
+			<button id="saveAsTemplate" onclick="document.getElementById('output').innerText=poster_editor.toTemplateStr()">Template String</button>
+			<button id="loadTemplate">load Template(toDo)</button>
+			<button id="addImage" onclick="poster_editor.addImage('image1.jpg', 200,200)">add Image</button>
+			<button id="addText" onclick="poster_editor.addText('hello world!', 0,0)">add Text</button>
+			<button id="toImage">Open as new Image(toDo)</button>
+		</div>
+		<div id="canvas" style="width:720px;height:480px;display:block"></div>
+                <div id="output"></div>
+	</div>
+
+</body>
+
+</html>
