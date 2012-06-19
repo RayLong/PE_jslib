@@ -57,6 +57,20 @@ VectorEditor.prototype.getShapeById = function(v){
 
 VectorEditor.prototype.addShape = function(shape,no_select, no_fire){
   if(!no_fire)this.fire("addshape",shape,no_select);
+  shape.hover(function () {
+        if (shape.paper.editor.action=="") {
+           //console.log("no action");
+           if (!shape.paper.editor.is_selected(shape)) {
+               var box=shape.getBBox();
+               shape.hovered_rect=shape.paper.rect(box.x,box.y,box.width,box.height).attr({"rotation":shape.attr("rotation"),"stroke":"#ff0000","stroke-width":2,"stroke-opacity":0.7,"stroke-dasharray":"-."});
+           }
+        }
+      },
+      function () {
+        if(shape.hovered_rect)
+          shape.hovered_rect.remove();
+      });
+
   shape.node.shape_object = shape
   if(!no_select){
     this.selected = [shape]

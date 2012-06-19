@@ -4,6 +4,8 @@ var poster_editor={
     raphael_editor: null,
 
     canvas_div:null,
+    
+    backgroundImage: null,
 
 
     attachCanvas: function(canvas) {
@@ -17,6 +19,7 @@ var poster_editor={
     
     setBackgroundImage: function(url) {
 	if(this.canvas_div) {
+	      this.backgroundImage=url;
 	      this.canvas_div.style.backgroundImage="url('"+url+"')";
 	      this.canvas_div.style.backgroundRepeat="no-repeat";
 	      this.canvas_div.style.backgroundPosition="center";
@@ -30,7 +33,7 @@ var poster_editor={
       img.raphael_editor=this.raphael_editor;
       img.onload=function () {
 	      var shape=this.raphael_editor.draw.image(url,x,y,img.width,img.height);
-	      this.raphael_editor.addShape(shape,1);
+              this.raphael_editor.addShape(shape,1);
       };
       img.src=url;
     },
@@ -57,9 +60,8 @@ var poster_editor={
 		shape.node.style.fontStyle=options.fontStyle;
 		shape.node.textContent=text;
 		shape.translate(x,y);
-		shape.scale(1.5,9);
 		shape.attr({fill:options.fontColor,fillOpacity:1});
-		this.raphael_editor.addShape(shape,1);
+               	this.raphael_editor.addShape(shape,1);
         } else {
 		throw "renderText return failed!"
 	}
@@ -70,10 +72,34 @@ var poster_editor={
     },
 
     toTemplateStr: function () {
-        if (this.canvas_div == null)
+        if (this.raphael_editor == null)
             return "";
-        var tmp=document.createElement('div');
-	$(this.canvas_div).clone().appendTo($(tmp));
-	return tmp.innerHTML;
+
+	var txt="{type:'free_template',backgroundImage:'"+
+		this.backgroundImage+"',[";
+	var shapes=this.raphael_editor.shapes;
+	if (JSON)
+    	    for (var ii=0; ii < shapes.length; ii++) {
+		    if (ii != 0)
+			    txt+=",";
+		    switch (shapes[ii].type) {
+		      case 'image':
+			      txt+="{attrs:"+JSON.stringify(shapes[ii].attrs);
+			      txt+=",type:"+JSON.stringify(shapes[ii].type);
+			      txt+=",transformations:"+JSON.stringify(shapes[ii].transformations)+"}";
+			      break;
+		      case 'path':
+			      txt+="{attrs:"+JSON.stringify(shapes[ii].attrs);
+			      txt+=",type:"+JSON.stringify(shapes[ii].type);
+			      txt+=",transformations:"+JSON.stringify(shapes[ii].transformations);
+
+			      txt+=',fontSize:"'+shapes[ii].node.style.fontSize+'"';
+			      txt+=',fontFamily:"'+shapes[ii].node.style.fontFamily+'"';
+			      txt+=',fontStyle:"'+shapes[ii].node.style.fontStyle+'"}';
+			      break;
+		    }
+	    }
+	txt+="]}";
+	return txt;
     }
 };

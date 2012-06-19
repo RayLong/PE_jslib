@@ -251,7 +251,6 @@ VectorEditor.prototype.onMouseDown = function(x, y, target){
       return; //die trackers die!
     }
     
-    
     if(this.selectadd){
       this.selectAdd(shape_object);
       this.action = "move";
@@ -261,6 +260,10 @@ VectorEditor.prototype.onMouseDown = function(x, y, target){
     }else{
       this.action = "move";
     }
+
+    if (shape_object.hovered_rect)
+            shape_object.hovered_rect.remove();
+ 
     this.offsetXY = [shape_object.attr("x") - x,shape_object.attr("y") - y]
     
   }else if(this.mode == "delete" && !this.selectbox){
@@ -375,13 +378,14 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
           //this.onGrabBox = this.selected[0].getBBox()
         }
         var box = this.selected[0].getBBox();
-        var nxy=this.returnRotatedPoint(x, y, box.x + box.width/2, box.y + box.height/2, -this.selected[0].attr("rotation"));
+        var nxy = this.returnRotatedPoint(x, y, box.x + box.width/2, box.y + box.height/2, -this.selected[0].attr("rotation"));
         x = nxy[0]; 
         y = nxy[1]; 
         if(this.selected[0].type == "rect"){
           this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
         }else if(this.selected[0].type == "image"){
-          var new_w, new_h;
+          var new_w; 
+          var new_h;
           new_w = x - box.x;
           new_w = new_w > 1 ? new_w : 1;
           new_h = y - box.y;
@@ -396,9 +400,9 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
         }else if(this.selected[0].type == "path"){
 	  var sx=(x - (box.x+box.width/2))/(box.width/2);
 	  var sy=(y - (box.y+box.height/2))/(box.height/2);
-	  var scale_attr=this.selected[0].attrs['scale'].split(" ");
-	  sx=sx*scale_attr[0];
-	  sy=sy*scale_attr[1];
+	  var scale_attr=this.selected[0].attr('scale');  
+	  sx=sx*scale_attr.x;
+	  sy=sy*scale_attr.y;
 	  if (sx * box.width < 1)
 		  sx=1/box.width;
 	  if (sy * box.height < 1 )
