@@ -365,12 +365,7 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
             this.selected[0].attr("cy")
           ]
           }else if(this.selected[0].type == "path"){
-            this.onGrabXY = [
-              this.selected[0].getBBox().x,
-              this.selected[0].getBBox().y,
-              this.selected[0].getBBox().width,
-              this.selected[0].getBBox().height
-            ]
+            this.onGrabXY = []
           }else{
             this.onGrabXY = [
               this.selected[0].attr("x"),
@@ -379,29 +374,36 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
           }
           //this.onGrabBox = this.selected[0].getBBox()
         }
-        var box = this.selected[0].getBBox()
-        var nxy = this.returnRotatedPoint(x, y, box.x + box.width/2, box.y + box.height/2, -this.selected[0].attr("rotation"))
-        x = nxy[0] - 5
-        y = nxy[1] - 5
+        var box = this.selected[0].getBBox();
+        var nxy=this.returnRotatedPoint(x, y, box.x + box.width/2, box.y + box.height/2, -this.selected[0].attr("rotation"));
+        x = nxy[0]; 
+        y = nxy[1]; 
         if(this.selected[0].type == "rect"){
           this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
         }else if(this.selected[0].type == "image"){
-          this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
+          var new_w, new_h;
+          new_w = x - box.x;
+          new_w = new_w > 1 ? new_w : 1;
+          new_h = y - box.y;
+          new_h = new_h > 1 ? new_h : 1;
+          this.resize(this.selected[0], new_w, new_h, this.onGrabXY[0], this.onGrabXY[1])
+          this.selected[0].translate(-(new_w-box.width)/2,
+                                     -(new_h-box.height)/2);
         }else if(this.selected[0].type == "ellipse"){
           this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
         }else if(this.selected[0].type == "text"){
           this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
         }else if(this.selected[0].type == "path"){
-	  var sx=(x - this.onGrabXY[0])/box.width;
-	  var sy=(y - this.onGrabXY[1])/box.height;
+	  var sx=(x - (box.x+box.width/2))/(box.width/2);
+	  var sy=(y - (box.y+box.height/2))/(box.height/2);
 	  var scale_attr=this.selected[0].attrs['scale'].split(" ");
 	  sx=sx*scale_attr[0];
 	  sy=sy*scale_attr[1];
-	  if (sx < 0.05)
-		  sx=0.05;
-	  if (sy < 0.05)
-		  sy=0.05;
-          this.selected[0].scale(sx, sy, this.onGrabXY[0], this.onGrabXY[1]);
+	  if (sx * box.width < 1)
+		  sx=1/box.width;
+	  if (sy * box.height < 1 )
+		  sy=1/box.height;
+          this.selected[0].scale(sx, sy); //, box.x+box.width/2, box.y+box.height/2);
         }
         this.newTracker(this.selected[0])
       }
