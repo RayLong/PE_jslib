@@ -26,16 +26,43 @@ var poster_editor={
 	}
     },
 
-    addImage: function (url, x, y) {
+    addImage: function (url, x, y, w, h) {
       if (!this.raphael_editor)
-	    return ;
-      var img=document.createElement('img');
-      img.raphael_editor=this.raphael_editor;
-      img.onload=function () {
-	      var shape=this.raphael_editor.draw.image(url,x,y,img.width,img.height);
-              this.raphael_editor.addShape(shape,1);
-      };
-      img.src=url;
+	    throw "editor hasn't initialized!";
+      var shape=this.raphael_editor.draw.image(url,x,y,w,h);
+      this.raphael_editor.addShape(shape,1);
+      return shape;
+    },
+
+    getObjData: function (Obj) {
+      if (!this.raphael_editor)
+         throw "editor hasn't initialized!";
+      if( this.raphael_editor.in_array(Obj,this.raphael_editor.shapes) != -1) {
+         if (Obj.type == 'image')
+             return {left:Obj.attr("x"),top:Obj.attr("y"),width:Obj.attr("width"),height:Obj.attr("height"),angle:Obj.attr("rotation")};
+         else if (Obj.type == 'path') {
+             var box=Obj.getBBox();
+             return {left:box.x, top:box.y, width:box.width, height:box.height, angle: Obj.attr('rotation')};
+         }
+      } else
+        return {};
+    },
+
+    deleteObject: function(Obj) {
+       if (!this.raphael_editor)
+           throw "editor hasn't initialized!";
+       if( this.raphael_editor.in_array(Obj,this.raphael_editor.shapes) != -1) {
+           this.raphael_editor.deleteShape(Obj);
+       }
+    },
+ 
+    getSelected: function() {
+
+       if (this.raphael_editor && this.raphael_editor.selected.length)
+          return this.raphael_editor.selected;
+       else
+          return []
+
     },
 
     renderText: null,
@@ -62,6 +89,7 @@ var poster_editor={
 		shape.translate(x,y);
 		shape.attr({fill:options.fontColor,fillOpacity:1});
                	this.raphael_editor.addShape(shape,1);
+                return shape;
         } else {
 		throw "renderText return failed!"
 	}

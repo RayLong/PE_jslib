@@ -9,6 +9,21 @@
 	<script type="text/javascript" src="tracker.js"></script>
 	<script type="text/javascript" src="path.js"></script>
 	<script type="text/javascript">
+
+                function deleteSelected() {
+                   var sel=poster_editor.getSelected();
+                   if (sel.length)
+                     poster_editor.deleteObject(sel[0]);
+                   else
+                      alert("Nothing selected"); 
+                }
+                function showData() {
+                   var sel=poster_editor.getSelected();
+                   if (sel.length)
+			   $('#output').text(JSON.stringify(poster_editor.getObjData(sel[0]))); 
+                   else
+                           $('#output').text("Nothing selected");
+                }
 		window.onload=function(){
 			poster_editor.attachCanvas(document.getElementById('canvas'));
 			poster_editor.setBackgroundImage('ccc.jpg');
@@ -26,11 +41,10 @@
 <body>
 	<div style="border:1px solid #555555;display:inline-block">
 		<div class="toolbar">
-			<button id="saveAsTemplate" onclick="document.getElementById('output').innerText=poster_editor.toTemplateStr()">Template String</button>
-			<button id="loadTemplate">load Template(toDo)</button>
-			<button id="addImage" onclick="poster_editor.addImage('image1.jpg', 200,200)">add Image</button>
-			<button id="addText" onclick="poster_editor.addText('hello world!', 0,0)">add Text</button>
-			<button id="toImage">Open as new Image(toDo)</button>
+			<button id="Delete" onclick="deleteSelected()">Delete Seleted</button>
+			<button id="addImage" onclick="poster_editor.addImage('image1.jpg', 200,200,100,100)">add Image</button>
+			<button id="addText" onclick="poster_editor.addText('hello world!', 50,50)">add Text</button>
+			<button id="getData" onclick="showData()">get Selected Data</button>
 		</div>
 		<div id="canvas" style="width:720px;height:480px;display:block"></div>
                 <div id="output"></div>
