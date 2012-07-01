@@ -13,17 +13,6 @@ function VectorEditor(elem, width, height){
   this.offsetXY = [0,0]
   this.tmpXY = [0,0]
 
-  //cant think of any better way to do it
-  this.prop = {
-    "src": "http://upload.wikimedia.org/wikipedia/commons/a/a5/ComplexSinInATimeAxe.gif",
-    "stroke-width": 1,
-    "stroke": "#000000",
-    "fill": "#ff0000",
-    "stroke-opacity": 1,
-    "fill-opacity": 1,
-    "text": "Text"
-  }
-     
   this.mode = "select";
   this.selectbox = null;
   this.selected = []
@@ -223,11 +212,6 @@ VectorEditor.prototype.set_attr = function(){
   }
 }
 
-VectorEditor.prototype.set = function(name, value){
-  this.prop[name] = value;
-  this.set_attr(name, value);
-}
-
 VectorEditor.prototype.onMouseDown = function(x, y, target){
   this.fire("mousedown")
   this.tmpXY = this.onHitXY = [x,y]
@@ -266,70 +250,11 @@ VectorEditor.prototype.onMouseDown = function(x, y, target){
  
     this.offsetXY = [shape_object.attr("x") - x,shape_object.attr("y") - y]
     
-  }else if(this.mode == "delete" && !this.selectbox){
-    var shape_object = null
-    if(target.shape_object){
-      shape_object = target.shape_object
-    }else if(target.parentNode.shape_object){
-      shape_object = target.parentNode.shape_object
-    }else if(!target.is_tracker){
-      this.selectbox = this.draw.rect(x, y, 0, 0)
-        .attr({"fill-opacity": 0.15, 
-              "stroke-opacity": 0.5, 
-              "fill": "#ff0000", //oh noes! its red and gonna asplodes!
-              "stroke": "#ff0000"});
-      return;
-    }else{
-      return; //likely tracker
-    }
-    this.deleteShape(shape_object)
-    this.offsetXY = [shape_object.attr("x") - x,shape_object.attr("y") - y]
-  }else if(this.selected.length == 0){
-    var shape = null;
-    if(this.mode == "rect"){
-      shape = this.draw.rect(x, y, 0, 0);
-    }else if(this.mode == "ellipse"){
-      shape = this.draw.ellipse(x, y, 0, 0);
-    }else if(this.mode == "path"){
-      shape = this.draw.path("M{0},{1}",x,y)
-    }else if(this.mode == "line"){
-      shape = this.draw.path("M{0},{1}",x,y)
-      shape.subtype = "line"
-    }else if(this.mode == "polygon"){
-      shape = this.draw.path("M{0},{1}",x,y)
-      shape.polypoints = [[x,y]]
-      shape.subtype = "polygon"
-    }else if(this.mode == "image"){
-      shape = this.draw.image(this.prop.src, x, y, 0, 0);
-      
-      //WARNING NEXT IS A HACK!!!!!!
-      //shape.attr("src",this.prop.src); //raphael won't return src correctly otherwise
-    }else if(this.mode == "text"){
-      shape = this.draw.text(x, y, this.prop['text']).attr('font-size',0)
-      shape.text = this.prop['text'];
-      //WARNING NEXT IS A HACK!!!!!!
-      //shape.attr("text",this.prop.text); //raphael won't return src correctly otherwise
-    }
-    if(shape){
-      shape.id = this.generateUUID();
-      shape.attr({
-          "fill": this.prop.fill, 
-          "stroke": this.prop.stroke,
-          "stroke-width": this.prop["stroke-width"],
-          "fill-opacity": this.prop['fill-opacity'],
-          "stroke-opacity": this.prop["stroke-opacity"]
-      })
-      this.addShape(shape)
-    }
-  }else{
-    
   }
   return false;
 }
 
 VectorEditor.prototype.onMouseMove = function(x, y, target){
-
-
   this.fire("mousemove")
   if(this.mode == "select" || this.mode == "delete"){
     if(this.selectbox){
@@ -351,23 +276,9 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
         this.selected[0].rotate(deg, true); //absolute!
         //this.rotateTracker(deg, (box.x + box.width/2), (box.y + box.height/2))
         this.updateTracker();
-      }else if(this.action.substr(0,4) == "path"){
-        var num = parseInt(this.action.substr(4))
-        var pathsplit = Raphael.parsePathString(this.selected[0].attr("path"))
-        if(pathsplit[num]){
-          pathsplit[num][1] = x
-          pathsplit[num][2] = y
-          this.selected[0].attr("path", pathsplit)
-          this.updateTracker()
-        }
       }else if(this.action == "resize"){
         if(!this.onGrabXY){ //technically a misnomer
-          if(this.selected[0].type == "ellipse"){
-          this.onGrabXY = [
-            this.selected[0].attr("cx"),
-            this.selected[0].attr("cy")
-          ]
-          }else if(this.selected[0].type == "path"){
+          if(this.selected[0].type == "path"){
             this.onGrabXY = []
           }else{
             this.onGrabXY = [
@@ -381,9 +292,7 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
         var nxy = this.returnRotatedPoint(x, y, box.x + box.width/2, box.y + box.height/2, -this.selected[0].attr("rotation"));
         x = nxy[0]; 
         y = nxy[1]; 
-        if(this.selected[0].type == "rect"){
-          this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
-        }else if(this.selected[0].type == "image"){
+        if(this.selected[0].type == "image"){
           var new_w; 
           var new_h;
           new_w = x - box.x;
@@ -393,10 +302,6 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
           this.resize(this.selected[0], new_w, new_h, this.onGrabXY[0], this.onGrabXY[1])
           this.selected[0].translate(-(new_w-box.width)/2,
                                      -(new_h-box.height)/2);
-        }else if(this.selected[0].type == "ellipse"){
-          this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
-        }else if(this.selected[0].type == "text"){
-          this.resize(this.selected[0], x - this.onGrabXY[0], y - this.onGrabXY[1], this.onGrabXY[0], this.onGrabXY[1])
         }else if(this.selected[0].type == "path"){
 	  var sx=(x - (box.x+box.width/2))/(box.width/2);
 	  var sy=(y - (box.y+box.height/2))/(box.height/2);
@@ -411,57 +316,6 @@ VectorEditor.prototype.onMouseMove = function(x, y, target){
         }
         this.newTracker(this.selected[0])
       }
-    }
-  }else if(this.selected.length == 1){
-    if(this.mode == "rect"){
-      this.resize(this.selected[0], x - this.onHitXY[0], y - this.onHitXY[1], this.onHitXY[0], this.onHitXY[1])
-    }else if(this.mode == "image"){
-      this.resize(this.selected[0], x - this.onHitXY[0], y - this.onHitXY[1], this.onHitXY[0], this.onHitXY[1])
-    }else if(this.mode == "ellipse"){
-      this.resize(this.selected[0], x - this.onHitXY[0], y - this.onHitXY[1], this.onHitXY[0], this.onHitXY[1])
-    }else if(this.mode == "text"){
-      this.resize(this.selected[0], x - this.onHitXY[0], y - this.onHitXY[1], this.onHitXY[0], this.onHitXY[1])
-    }else if(this.mode == "path"){
-      //this.selected[0].lineTo(x, y);
-      this.selected[0].attr("path", this.selected[0].attrs.path + 'L'+x+' '+y)
-    }else if(this.mode == "polygon" || this.mode == "line"){
-      //this.selected[0].path[this.selected[0].path.length - 1].arg[0] = x
-      //this.selected[0].path[this.selected[0].path.length - 1].arg[1] = y
-      //this.selected[0].redraw();
-      //var pathsplit = this.selected[0].attr("path").split(" ");
-      
-      //theres a few freaky bugs that happen due to this new IE capable way that is probably better
-    
-      var pathsplit = Raphael.parsePathString(this.selected[0].attr("path"))
-      if(pathsplit.length > 1){
-        //var hack = pathsplit.reverse().slice(3).reverse().join(" ")+' ';
-        
-        //console.log(pathsplit)
-        if(this.mode == "line"){
-          //safety measure, the next should work, but in practice, no
-          pathsplit.splice(1)
-        }else{
-          var last = pathsplit[pathsplit.length -1];
-          //console.log(this.selected[0].polypoints.length, pathsplit.length)
-          if(this.selected[0].polypoints.length < pathsplit.length){
-          //if(Math.floor(last[1]) == this.lastpointsX && Math.floor(last[2]) == this.lastpointsY){
-            pathsplit.splice(pathsplit.length - 1, 1);
-            }
-          //}else{
-          //  console.log(last[1], last[2], this.lastpointsX, this.lastpointsY)
-          //}
-        }
-        //this.lastpointsX = x; //TO FIX A NASTY UGLY BUG
-        //this.lastpointsY = y; //SERIOUSLY
-        
-        this.selected[0].attr("path", pathsplit.toString() + 'L'+x+' '+y)
-        
-      }else{
-        //console.debug(pathsplit)
-        //normally when this executes there's somethign strange that happened
-        this.selected[0].attr("path", this.selected[0].attrs.path + 'L'+x+' '+y)
-      }
-      //this.selected[0].lineTo(x, y)
     }
   }
   
@@ -527,37 +381,8 @@ VectorEditor.prototype.onMouseUp = function(x, y, target){
     }else{
       this.action = "";
     }
-  }else if(this.selected.length == 1){
-    if(this.selected[0].getBBox().height == 0 && this.selected[0].getBBox().width == 0){
-      if(this.selected[0].subtype != "polygon"){
-        this.deleteShape(this.selected[0])
-      }
-    }
-    if(this.mode == "rect"){
-      this.unselect()
-    }else if(this.mode == "ellipse"){
-      this.unselect()
-    }else if(this.mode == "path"){
-      this.unselect()
-    }else if(this.mode == "line"){
-      this.unselect()
-    }else if(this.mode == "image"){
-      this.unselect()
-    }else if(this.mode == "text"){
-      this.unselect()
-    }else if(this.mode == "polygon"){
-        //this.selected[0].lineTo(x, y)
-      this.selected[0].attr("path", this.selected[0].attrs.path + 'L'+x+' '+y)
-      if(!this.selected[0].polypoints) this.selected[0].polypoints = [];
-      this.selected[0].polypoints.push([x,y])  
-      
-    }
   }
-  if(this.lastmode){
-    this.setMode(this.lastmode);
-    //this.mode = this.lastmode //not selectmode becasue that unselects
-    delete this.lastmode;
-  }
+  
   return false;
 }
 
