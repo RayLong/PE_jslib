@@ -21,7 +21,7 @@
                 function showData() {
                    var sel=poster_editor.getSelected();
                    if (sel.length)
-			   $('#output').text(JSON.stringify(poster_editor.getObjData(sel[0]))); 
+			   $('#output').text(JSON.stringify(poster_editor.getAttrs(sel[0]))); 
                    else
                            $('#output').text("Nothing selected");
                 }
@@ -29,19 +29,22 @@
                 function save() {
                    $('#output').text(poster_editor.saveToJSON());
                 }
+
                 function load() {
                    poster_editor.loadFromJSON($('#output').text());                   
                 }
+
+                function addImage() {
+                    poster_editor.addImage('image1.jpg', 200,200,0,100);
+                }
+
+		function addText()  {
+                    poster_editor.addTextByPath('hello world!', 50,50, path_string,{fontColor:'red'});
+                }
+
 		window.onload=function(){
 			poster_editor.attachCanvas(document.getElementById('canvas'));
 			poster_editor.setBackgroundImage('ccc.jpg');
-			poster_editor.renderText=function (text,options) {
-                             //please use ajax to get a PATH string from server,
-                             //which is rendered by server with the text.
-                             //here is just a test case, will not use ajax to 
-			     //request the service.
-				return path_string;
-                          }; 
 		}
 	</script>
 </head>
@@ -50,8 +53,8 @@
 	<div style="border:1px solid #555555;display:inline-block">
 		<div class="toolbar">
 			<button id="Delete" onclick="deleteSelected()">Delete Seleted</button>
-			<button id="addImage" onclick="poster_editor.addImage('image1.jpg', 200,200,0,100)">add Image</button>
-			<button id="addText" onclick="poster_editor.addText('hello world!', 50,50,{fontColor:'red'})">add Text</button>
+			<button id="addImage" onclick="addImage()//poster_editor.addImage('image1.jpg', 200,200,0,100)">add Image</button>
+			<button id="addText" onclick="addText()//poster_editor.addTextByPath('hello world!', 50,50, path_string,{fontColor:'red'})">add Text</button>
 			<button id="getData" onclick="showData()">get Selected Data</button>
 			<button id="saveToJSON" onclick="save()">save to JSON</button>
 			<button id="loadFromJSON" onclick="load()">load from JSON</button>

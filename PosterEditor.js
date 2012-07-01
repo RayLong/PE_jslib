@@ -55,7 +55,8 @@ var poster_editor={
                     top:Obj.attr("y"),
                     width:Obj.attr("width"),
                     height:Obj.attr("height"),
-                    angle:Obj.attr("rotation")
+                    angle:Obj.attr("rotation"),
+                    src:Obj.attr("src")
                    };
          }else if (Obj.type == 'path' && (Obj.node.id.search('text_') == 0)) {
             var box=Obj.getBBox();
@@ -64,7 +65,11 @@ var poster_editor={
                      top:box.y,
                      width:box.width,
                      height:box.height,
-                     angle: Obj.attr("rotation")
+                     angle: Obj.attr("rotation"),
+                     fontFamily: Obj.node.style.fontFamily,
+                     fontSize: Obj.node.style.fontSize,
+                     fontStyle: Obj.node.style.fontStyle,
+                     color:     Obj.node.style.color
                    };
          }
       }
@@ -80,7 +85,7 @@ var poster_editor={
                       left: Obj.attr("x"), top: Obj.attr("y"),
                       //cx:cx,cy:cy,
                       width:Obj.attr("width"),height:Obj.attr("height"),angle:Obj.attr("rotation"),
-                      src:Obj.node.src});
+                      src:Obj.attr('src')});
          }
          else if (Obj.type == 'path' && ( Obj.node.id.search('text_') == 0 )) {
              var box=Obj.getBBox();
@@ -139,6 +144,9 @@ var poster_editor={
 	shape.node.style.color=options.fontColor;
 	shape.node.style.fontStyle=options.fontStyle;
 	shape.node.textContent=text;
+        var box=shape.getBBox();
+        x = x - box.x;
+        y = y - box.y;
 	shape.translate(x,y);
 	shape.attr({fill:options.fontColor,fillOpacity:1,stroke:options.fontColor});
 	this.raphael_editor.addShape(shape,1);
@@ -158,15 +166,15 @@ var poster_editor={
         p.backgroundImage || this.setBackgroundImage(p.backgroundImage);
         this.template_type=p.type;
 
-        this.raphael_editor.deteleAll();
+        this.raphael_editor.deleteAll();
 
         for (var ii = 0; ii < p.objects.length; ii ++) {
             var shape=p.objects[ii];
             if (shape.type == "image") {
-                var image=this.raphael_editor.addImage(shape.src, shape.left, shape.top, shape.width, shape.height);
+                var image=this.addImage(shape.src, shape.left, shape.top, shape.width, shape.height);
                 image.attr("rotation",shape.angle);
             } else if (shape.type == "text") {
-                var text=this.raphael_editor.addTextByPath(shape.text, shape.left, shape.top, shape.path, {fontFamily:shape.fontFamily,fontSize:shape.fontSize,fontColor:shape.color,fontStyle:shape.fontStyle});
+                var text=this.addTextByPath(shape.text, shape.left, shape.top, shape.path, {fontFamily:shape.fontFamily,fontSize:shape.fontSize,fontColor:shape.color,fontStyle:shape.fontStyle});
                 text.attr("rotation",shape.angle);
                 var box=text.getBBox();
                 text.scale(shape.width/box.width,shape.height/box.height);
